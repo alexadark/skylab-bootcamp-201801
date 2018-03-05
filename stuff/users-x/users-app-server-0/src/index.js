@@ -28,7 +28,6 @@ MongoClient.connect(`mongodb://${host}:${port}`, (err, conn) => {
             if (err) throw err
 
             let { query: { id, error, user } } = req
-
             if (user) user = JSON.parse(user)
 
             res.render('index', { users, id, error, user })
