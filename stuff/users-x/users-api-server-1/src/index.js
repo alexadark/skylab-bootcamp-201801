@@ -1,10 +1,11 @@
-require('dotenv').config()
+require('dotenv').config();
 
-const express = require('express')
-const bodyParser = require('body-parser')
-const mongoose = require('mongoose')
-const uuid = require('uuid/v4')
-const { success, fail } = require('./api-utils')
+const express = require('express');
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const uuid = require('uuid/v4');
+const { success, fail } = require('./api-utils');
+const ObjectId = require('mongodb').ObjectID;
 
 const User = mongoose.model('User', {
     id: String,
@@ -13,7 +14,7 @@ const User = mongoose.model('User', {
     email: String,
     username: String,
     password: String
-})
+});
 
 
 const mongo = {
