@@ -1,12 +1,13 @@
-import React, { Component } from 'react';
-import { Route } from 'react-router-dom';
-import api from '../../services/api'
-import Register from '../register'
-import Following from '../following'
+import React, { Component } from 'react'
+import { Route, Switch } from 'react-router-dom'
+import LoginWithRouter from '../login'
+import RegisterWithRouter from '../register'
 import User from '../user'
+import ToFollow from '../toFollow'
+import Following from '../following'
 import Account from '../account'
-
-
+import UploadWithRouter from '../uploader'
+import Image from '../image'
 
 class Home extends Component {
     constructor() {
@@ -16,32 +17,45 @@ class Home extends Component {
         }
     }
 
-    componentWillMount() {
-        api.listUser("5aad319e734d1d1b8288cc6f")
-            .then(users => this.setState({ users }))
-
-     }
-
     render() {
         return (
             <div>
+                <Switch>
 
-                <Route exact path="/" render={() => (
-                    <User users={this.state.users} />
-                )} />
+                    <Route path="/user" component={User} />
 
-                 <Route  path="/following" render={() => (
-                    <Following />
-                )} />  
+                    <Route exact path="/" render={() => (
+                        <LoginWithRouter />
+                    )} />
 
-                <Route path="/register" render={() => (
-                    <Register />
-                )} />
-        
-                <Route path="/account" render={() => (
-                    <Account />
-                )} />
+                    <Route path="/register" render={() => (
+                        <RegisterWithRouter />
+                    )} />
 
+                    <Route path="/following" render={() => (
+                        <Following />
+                    )} />
+
+                    <Route path="/tofollow" render={() => (
+                        <ToFollow />
+                    )} />
+
+                    <Route path="/account" render={() => (
+                        <Account />
+                    )} />
+
+                    <Route path="/upload" render={() => (
+                        <UploadWithRouter />
+                    )} />
+
+                    <Route path="/image/:imageId" component={Image} 
+                    />
+
+                    <Route render={() => (
+                        <LoginWithRouter />
+                    )} />
+
+                </Switch>
             </div>
 
         );

@@ -1,9 +1,9 @@
-
 const express = require('express')
 const logic = require('../logic')
 const bodyParser = require('body-parser')
 require('dotenv').config()
 const jwt = require('jsonwebtoken')
+const { success, fail } = require('./handlers/api-utils')
 
 const routes = express.Router()
 const jsonBodyParser = bodyParser.json()
@@ -21,10 +21,12 @@ function jwtValidate(req, res, next) {
 
         jwt.verify(token, secret)
 
+        req.tokencito = jwt.verify(token, secret)
+
         next()
-        
+
     } catch (err) {
-        res.json(err.message)
+        res.json(fail("Invalid Token"))
 
     }
 }
@@ -34,70 +36,123 @@ routes.post('/login', jsonBodyParser, (req, res) => {
     const { body: { username, password } } = req
 
     logic.login(username, password)
-        .then(() => {
-            const token = jwt.sign({ username }, secret, { expiresIn })
+        .then(user => {
 
-            return res.json({token})
+            const token = jwt.sign({ id: user._id }, secret, { expiresIn })
+            return res.json(success({ token }))
         })
-        .catch(err => res.json(err.message))
+        .catch(err => res.json(fail(err.message)))
 })
 
 routes.post('/create', jsonBodyParser, (req, res) => {
     const { body: { name, username, password } } = req
 
     logic.register(name, username, password)
-        .then((data) => {
-
-            return res.json(data)
+        .then((user) => {
+            const token = jwt.sign({ id: user._id }, secret, { expiresIn })
+            return res.json(success({ token }))
         })
-        .catch(err => res.json(err.message))
+        .catch(err => res.json(fail(err.message)))
 })
 
-routes.get('/:id/following', jwtValidate, (req, res) => {
+routes.get('/following', jwtValidate, (req, res) => {
 
-    const { params: { id } } = req
+    const { id } = req.tokencito
 
     logic.getUserFollowing(id)
-        .then((data) => {
-            return res.json(data)
+        .then(following => {
+            res.json(success(following))
         })
-        .catch(err => res.json(err.message))
+        .catch(err => res.json(fail(err.message)))
 
 })
 
-routes.get('/:id', jwtValidate, (req, res) => {
-    const { params: { id } } = req
+
+routes.get('/list', jwtValidate, (req, res) => {
+
+    const { id } = req.tokencito
+
+    logic.getUsers(id)
+        .then(users => {
+            res.json(success(users))
+        })
+        .catch(err => res.json(fail(err.message)))
+})
+
+routes.get('/user', jwtValidate, (req, res) => {
+
+    const { id } = req.tokencito
 
     logic.getUser(id)
-        .then((data) => {
-            return res.json(data)
+        .then(user => {
+            res.json(success(user))
         })
-        .catch(err => res.json(err.message))
+        .catch(err => res.json(fail(err.message)))
 })
 
 
-routes.put('/:id/update', [jwtValidate, jsonBodyParser], (req, res) => {
+routes.put('/update', [jwtValidate, jsonBodyParser], (req, res) => {
     const { body: { name, username, password, newName, newUsername, newPassword } } = req
-    const { params: { id } } = req
+
+    const { id } = req.tokencito
 
     logic.update(id, name, username, password, newName, newUsername, newPassword)
-        .then((data) => {
-            return res.json(data)
-        })
-        .catch(err => res.json(err.message))
-})
-
-
-routes.delete('/:id/delete', [jwtValidate, jsonBodyParser], (req, res) => {
-    
-    const { params: { id } } = req
-    const { body: { username, password } } = req
-
-    logic.remove(id, username, password)
         .then(() => {
-            return res.json()
+            return res.json(success())
         })
-        .catch(err => res.json(err.message))
+        .catch(err => res.json(fail(err.message)))
 })
+
+routes.put('/updateImage', [jwtValidate, jsonBodyParser], (req, res) => {
+    const { body: { image } } = req
+
+    const { id } = req.tokencito
+
+    logic.updateImage(id, image)
+        .then(() => {
+            return res.json(success())
+        })
+        .catch(err => res.json(fail(err.message)))
+})
+
+routes.get('/image/:imageId', [jwtValidate, jsonBodyParser], (req, res) => {
+    const { params: { imageId } } = req
+
+    const { id } = req.tokencito
+
+    logic.getImage(id, imageId)
+        .then(image => {
+            res.json(success(image))
+        })
+        .catch(err => res.json(fail(err.message)))
+})
+
+routes.put('user/:userId/image/:imageId/comment', [jwtValidate, jsonBodyParser], (req, res) => {
+   
+    const { params: { userId, imageId } } = req
+    const {body: {comment}} =req
+    const { id } = req.tokencito
+
+    logic.commentImage(userId, imageId, comment, id)
+        .then((comments) => {
+            return res.json(success(comments))
+        })
+        .catch(err => res.json(fail(err.message)))
+})
+
+
+// routes.delete('/delete', [jwtValidate, jsonBodyParser], (req, res) => {
+
+//     // const { params: { id } } = req
+//     const { body: { username, password } } = req
+//     const { id } = req.tokencito
+
+//     logic.remove(id, username, password)
+//         .then(() => {
+//             return res.json(success())
+//         })
+//         .catch(err => res.json(err.message))
+// })
+
 
 module.exports = routes

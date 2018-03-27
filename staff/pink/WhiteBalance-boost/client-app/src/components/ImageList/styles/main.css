@@ -1,6 +1,8 @@
+@import url('https://fonts.googleapis.com/css?family=Lobster');
+
+
 header { 
-  
-  
+  font-family: 'Lobster', cursive;
   display: -ms-flexbox;
   -ms-flex-wrap: wrap;
   -ms-flex-direction: column;
@@ -13,6 +15,8 @@ header .imagen {
   -webkit-box-flex: auto;
   -ms-flex: auto;
   flex: auto; 
+  float:left;
+  position: relative;
   width: 400px; 
   overflow: hidden;
   cursor:pointer;
@@ -26,7 +30,7 @@ header .imagen img {
 
 .imagen:hover .comments {
     
-  transform: translateY(-35px);
+  transform: translateY(-45px);
   opacity:1;
   background-color: rgba(155, 155, 155, 0.9)
 } 
@@ -38,9 +42,10 @@ header .imagen .comments {
     display: flex;
     flex-flow: row;
     padding: 10px;
-    height: 35px;
+    width: 100%;
+    height: 45px;
     justify-content: space-between;
-    align-items: center; 
+    align-content: center; 
     transform: translateY(0);
     
   transition: all .3s ease-in-out;

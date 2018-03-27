@@ -1,59 +1,81 @@
-import React from 'react'
-import { NavLink } from 'react-router-dom'
+import React, { Component } from 'react'
+import { NavLink, withRouter } from 'react-router-dom'
 import './styles/main.css'
 import api from '../../services/api'
 
 
-class Register extends React.Component {
-    constructor(){
+class Register extends Component {
+    constructor() {
         super()
         this.state = {
-            nameInput : '',
-            usernameInput:'',
-            passwordInput:''
+            nameInput: '',
+            usernameInput: '',
+            passwordInput: '',
+            passwordInput2: '',
+            showError: false,
         }
     }
 
-keepInputName = (e) => { this.setState({nameValue : e.target.value})
+    keepInputName = (e) => {
+        this.setState({ nameInput: e.target.value })
 
-}
+    }
 
-keepInputUsername = (e) => { this.setState({usernameValue : e.target.value})
+    keepInputUsername = (e) => {
+        this.setState({ usernameInput: e.target.value })
 
-}
+    }
 
-keepInputPassword = (e) => { this.setState({passwordValue : e.target.value})
+    keepInputPassword = (e) => {
+        this.setState({ passwordInput: e.target.value })
 
-}
+    }
 
-handleSubmit(nameInput, usernameInput, passwordInput) {
-        api.login(nameInput, usernameInput, passwordInput).then(res => console.log(res))
-    
-}
+    keepInputPassword2 = (e) => {
+        this.setState({ passwordInput2: e.target.value })
+
+    }
+
+    handleSubmit = (e) => {
+        e.preventDefault()
+        const { nameInput, usernameInput, passwordInput, passwordInput2 } = this.state
+
+        if (passwordInput !== passwordInput2 && nameInput === "" && usernameInput === "" && passwordInput === "") {
+            this.setState({ showError: true })
+
+        } else {
+            api.create(nameInput, usernameInput, passwordInput)
+                .then(result => {
+                    localStorage.setItem('token', result.data.token)
+                    this.props.history.push('/user')
+                })
+        }
+        
+    }
 
     render() {
         return (
+            <div className="column-gray center-text centered-box column">
+                <form id="login">
+                    <input type="text" name="name" id="name" placeholder="name" className="personalized-input" onChange={this.keepInputName} value={this.state.nameInput} />
+                    <input type="text" name="username" id="username" placeholder="Username" className="personalized-input" onChange={this.keepInputUsername} value={this.state.usernameInput} />
+                    <input type="password" name="password" id="password" placeholder="Password" className="personalized-input" onChange={this.keepInputPassword} value={this.state.passwordInput} />
+                    <input type="password" name="password2" id="password2" placeholder="Retype password" className="personalized-input" onChange={this.keepInputPassword2} value={this.state.passwordInput2} />
+                    <br />
+                    <button value="register" type="submit" className="white-text button" onClick={this.handleSubmit}>{"Register"}</button>
+                    <NavLink value="login" to="/" className="white-text button">{"Login"}</NavLink>
 
-            <div className="row">
-                <div className="column column-double">
-                    <div className="row">
-                        <div className="column-gray center-text centered-box column">
-                            <form id="login" action="/login" method="post">
-                                <input type="text" name="name" id="name" placeholder="Name" className="personalized-input" onChange={this.keepInputName} value={this.state.nameInput} required/>
-                                <input type="text" name="username" id="username" placeholder="Username" className="personalized-input" onChange={this.keepInputUsername} value={this.state.usernameInput} required/>
-                                <input type="password" name="password" id="password" placeholder="Password" className="personalized-input" onChange={this.keepInputPassword} value={this.state.passwordInput} required/>
-                                <br/>
-                                <button value="login" type="submit" className="white-text button" onclick={(e) => { e.preventDefault(); this.handleSubmit(this.state.nameInput, this.state.usernameInput, this.state.passwordInput )}}><NavLink className="nav-link" to="/">Login</NavLink></button>
-                                
-                            </form>
-                        </div>
-                    </div>
-                </div>
+
+                    <h3>{(this.state.showError2) ? "Some inputs required" : ""}</h3>
+
+
+                </form>
             </div>
-        );
+        )
     }
-};
+}
 
-export default Register
+const RegisterWithRouter = withRouter(Register)
+export default RegisterWithRouter
 
 
