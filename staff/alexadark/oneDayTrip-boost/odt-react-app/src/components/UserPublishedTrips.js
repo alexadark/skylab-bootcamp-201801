@@ -1,7 +1,7 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import api from "../api";
 import PublishedTripItem from './PublishedTripItem'
-import {withRouter} from "react-router-dom";
+import { withRouter } from "react-router-dom";
 
 
 class UserPublishedTrips extends Component {
@@ -14,21 +14,33 @@ class UserPublishedTrips extends Component {
     }
 
     componentDidMount = () => {
-        this.listTrips()
+        this.listTrips(this.props.match.params.username)
     }
 
-    listTrips() {
+    listTrips(username) {
         api
-            .getUsernameId(this.props.match.params.username)
+            .getUsernameId(username)
             .then(res => res.data)
             .then(creatorId => {
                 api
                     .listUserPublishedTrips(creatorId)
                     .then(res => {
-                        this.setState({trips: res.data});
+                        this.setState({ trips: res.data });
 
                     })
             })
+    }
+
+    cancelTrip = (creator, tripId, password, callback) => {
+        console.log('cancel trip with password ', creator, tripId, password)
+
+        api.cancelTrip(creator, tripId, password)
+            .then(res => {
+                callback(undefined, res)
+
+                return this.listTrips(this.props.match.params.username)
+            })
+            .catch(callback)
     }
 
     render() {
@@ -38,7 +50,10 @@ class UserPublishedTrips extends Component {
 
                 {this.state.trips.map((trip, index) => (
                     <PublishedTripItem trip={trip}
-                                       key={index}
+                        key={index}
+                        user={this.props.user}
+                        onUpdateTrip={this.listTrips}
+                        onCancelTrip={this.cancelTrip}
                     />
                 ))}
             </div>
